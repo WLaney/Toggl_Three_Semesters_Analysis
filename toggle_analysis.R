@@ -41,42 +41,8 @@ totals_per_day<-function(data, start_date=data$Start.date[1],
 		plot(date_range, day_duration, type='h', main="total time worked vs day")
 }
 
-totals_per_week<-function(data, start_date=data$Start.date[1], 
-	end_date=data$Start.date[length(data$Start.date)], proj=data$Project,
-	desc=data$Description){
-	
-		#this function takes a data set with the optional arguments of a start date,
-		#end date, project, and desrciption. It outputs a histogram of the total time 
-		#spent on the project and description combinations per week over the time span.
-		#weeks start on Monday so this will corrospond to who toggl does weeks
-		#it defaluts to all projects and all descriptions over the time span of the data
-		
-		start_date<-as.Date(start_date)
-		end_date<-as.Date(end_date)
-		
-		#find the dates in range, you need to add 1 for the length bc of how seq works
-		date_range<-seq(start_date, end_date, length.out = end_date-start_date+1)
-		
-		#convert to weeks
-		weeks<-format(date_range, format = "%W")
-		week_range<-unique(weeks) #find the diffrent weeks we want data for
-		start_week<-format(data$Start.date, format = "%W")
-		
-		#find the totla duration of each day for the project and description combo used
-		week_duration<-rep(0, length(week_range))
-		for(i in 1:length(week_range)){
-			week_duration[i]<-sum(data$Duration[start_week== week_range[i]
-				& data$Project==proj & data$Description==desc])
-		}
-		print(summary(week_duration))
-		print(sd(week_duration))
-		#we need to get the week numbers back to dates so that the data plots in order
-		week_dates<-date_range[match(week_range, weeks)]
-		
-		plot(week_dates, week_duration, type='b', main="total time worked vs week")
-}
 
-ave_per_week_skips<-function(data, skips=as.Date(x = integer(0), origin = "1970-01-01"), 
+totals_per_week<-function(data, skips=as.Date(x = integer(0), origin = "1970-01-01"), 
 	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)], 
 	proj=data$Project, desc=data$Description){
 		#this function takes a data set with the optional arguments of a start date,
