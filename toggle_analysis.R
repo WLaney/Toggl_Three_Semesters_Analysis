@@ -4,23 +4,26 @@ clean_toggl_data<-function(file_path){
 	#that can be analysied by R
 	
 	#import data
-	data<-read.csv(file_path, header=T)
-
-	# #get rid of unused collums
-	# data_redus<-data.frame(data$Project, data$Description, data$Start.date, data$Start.time, data$End.date, data$End.time, data$Duration)
-	# str(data_redus)
-
+	toggl_data<-read.csv(file_path, header=T)
+	
 	#convert durations into fractions of hours 
 	#EX 00:15:00 -> 0.25 and 01:30:00-> 1.5
-	data$Duration<-sapply(strsplit(as.character(data$Duration), ":"), function(x) {
-		x <- as.numeric(x)
-		x[1] + (x[2] / 60)+(x[3]/(60*60))
-	})
+	toggl_data$Duration<-sapply(strsplit(as.character(toggl_data$Duration), ":"),
+		function(x) {
+			x <- as.numeric(x)
+			x[1] + (x[2] / 60)+(x[3]/(60*60))
+		})
 
-	#convert dates to Date type
-	data$Start.date<-as.Date(data$Start.date)
-	data$End.date<-as.Date(data$End.date)
-	data
+	#convert Start.date and End.date to Date type
+	toggl_data$Start.date<-as.Date(toggl_data$Start.date)
+	toggl_data$End.date<-as.Date(toggl_data$End.date)
+	
+	#conver Start.time and End.time into POSIXlt
+	toggl_data$Start.time<-strptime(toggl_data$Start.time, format="%H:%M:%S")
+	toggl_data$End.time<-strptime(toggl_data$End.time, format="%H:%M:%S")
+	
+	#return clean data
+	toggl_data
 }
 
 totals_worked<-function(data,
@@ -96,5 +99,6 @@ totals_worked<-function(data,
 }
 
 data<-clean_toggl_data("Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
+str(data)
 totals_worked(data, view_by="days")
 c("2017-03-05","2017-03-13")
