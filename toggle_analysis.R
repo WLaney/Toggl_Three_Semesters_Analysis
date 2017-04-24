@@ -15,20 +15,27 @@ data$Start.date<-as.Date(data$Start.date)
 data$End.date<-as.Date(data$End.date)
 str(data)
 
-totals_per_day<-function(data, start_date=data$Start.date[1], 
-	end_date=data$Start.date[length(data$Start.date)], proj=data$Project,
-	desc=data$Description){
+totals_per_day<-function(data,
+	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
+	skips=as.Date(x = integer(0), origin = "1970-01-01"),
+	proj=data$Project, desc=data$Description){
 	
 		#this function takes a data set with the optional arguments of a start date,
-		#end date, project, and desrciption. It outputs a histogram of the total time 
+		#end date, project, desrciption, and skips.
+		#It outputs a histogram of the total time 
 		#spent on the project and description combinations per day over the time span.
 		#it defaluts to all projects and all descriptions over the time span of the data
-		
 		start_date<-as.Date(start_date)
 		end_date<-as.Date(end_date)
-		
-		#find the dates in range, you need to add 1 for the length bc of how seq works
-		date_range<-seq(start_date, end_date, length.out = end_date-start_date+1)
+		skips<-as.Date(skips)
+		dates<-c(start_date, skips, end_date)
+		#find the dates in ranges that we want
+		date_range<-as.Date(x = integer(0), origin = "1970-01-01") #predefin variable
+		for(i in 1:(length(dates)*.5)){
+			#you need to add 1 for the length bc of how seq works
+			date_range_par<-seq(dates[(2*i)-1], dates[2*i], length.out = dates[2*i]-dates[(2*i)-1]+1)
+			date_range<-c(date_range, date_range_par)
+		}
 		
 		#find the totla duration of each day for the project and description combo used
 		day_duration<-rep(0, length(date_range))
@@ -42,17 +49,18 @@ totals_per_day<-function(data, start_date=data$Start.date[1],
 }
 
 
-totals_per_week<-function(data, skips=as.Date(x = integer(0), origin = "1970-01-01"), 
-	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)], 
+totals_per_week<-function(data, 
+	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
+	skips=as.Date(x = integer(0), origin = "1970-01-01"), 
 	proj=data$Project, desc=data$Description){
 		#this function takes a data set with the optional arguments of a start date,
 		#end date, project, desrciption, and skips.
-		#It outputs a plot of the total time 
-		#spent on the project and description combinations per week over the time span.
+		#It outputs a plot of the total time spent on the project and 
+		#description combinations per week over the time span.
 		#Weeks start on Monday so this will corrospond to who toggl does weeks
 		#It defaluts to all projects and all descriptions over the time span of the data
-		#this function gives the averaged worked per week with the ablity to exclude days
-		#from the average. 
+		#skip gives the ablity to exclude days from the data.
+		#They will not be counted in statistics or ploted
 		#Skips should be a vector that contain the first and last
 		#date included in the average. The dates between these will be exluded
 		#ex: skiped=(start date, end date, start date, end date ...)
@@ -60,7 +68,6 @@ totals_per_week<-function(data, skips=as.Date(x = integer(0), origin = "1970-01-
 		end_date<-as.Date(end_date)
 		skips<-as.Date(skips)
 		dates<-c(start_date, skips, end_date)
-		print(class(dates))
 		#find the dates in ranges that we want
 		date_range<-as.Date(x = integer(0), origin = "1970-01-01") #predefin variable
 		for(i in 1:(length(dates)*.5)){
@@ -89,7 +96,7 @@ totals_per_week<-function(data, skips=as.Date(x = integer(0), origin = "1970-01-
 }
 	
 	
-#totals_per_day(data)
-totals_per_week(data, desc="E&M")
-ave_per_week_skips(data ,desc="E&M")
+totals_per_day(data)
+totals_per_day(data, skips=c("2017-03-05","2017-03-13"))
+totals_per_week(data)
 c("2017-03-05","2017-03-13")
