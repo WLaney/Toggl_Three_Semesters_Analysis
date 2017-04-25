@@ -52,6 +52,15 @@ totals_worked<-function(data,
 		#date to be included. The dates between these will be exluded
 		#ex input: skiped=c(start date, end date, start date, end date ...)
 		
+		#proj<-factor((proj))
+		#print(proj)
+		#data<-data[data$Project==proj]
+		proj_included<-rep(0, length(data$Project))
+		for(i in 1:length(proj)){
+			proj_in<-data$Project==proj[i]
+			proj_included<-proj_included+proj_in
+		}
+		
 		start_date<-as.Date(start_date)
 		end_date<-as.Date(end_date)
 		skips<-as.Date(skips)
@@ -81,7 +90,7 @@ totals_worked<-function(data,
 		duration<-rep(0, length(range)) #pre allocate memory
 		for(i in 1:length(range)){
 			duration[i]<-sum(data$Duration[start_date==range[i]
-				& data$Project==proj & data$Description==desc])
+				& proj_included & data$Description==desc])
 		}
 		print(summary(duration))
 		print(sd(duration))
@@ -91,14 +100,19 @@ totals_worked<-function(data,
 		if (view_by=="week"){
 			#we need to get the week numbers to dates so that the data ploints in order
 			week_dates<-date_range[match(range, weeks)]
-			plot(week_dates, duration, type='b', main="total time worked vs week")
+			plot(week_dates, duration, type='b', main="total time worked vs week",
+			xlab="date", ylab="duration (Hr)")
 		}
 		else{
-			plot(date_range, duration, type='h', main="total time worked vs day")
+			plot(date_range, duration, type='h', main="total time worked vs day",
+			xlab="date", ylab="duration (Hr)")
 		}
 }
 
 data<-clean_toggl_data("Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
-str(data)
-totals_worked(data, view_by="days")
+
+totals_worked(data, proj=c("animal tag","school"), skip=c("2017-03-05","2017-03-13"))
+totals_worked(data, proj=c("animal tag"), skip=c("2017-03-05","2017-03-13"))
+totals_worked(data, proj=c("school"), skip=c("2017-03-05","2017-03-13"))
+
 c("2017-03-05","2017-03-13")
