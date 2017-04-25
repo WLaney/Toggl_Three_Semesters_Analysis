@@ -52,14 +52,23 @@ totals_worked<-function(data,
 		#date to be included. The dates between these will be exluded
 		#ex input: skiped=c(start date, end date, start date, end date ...)
 		
-		#proj<-factor((proj))
-		#print(proj)
-		#data<-data[data$Project==proj]
+		#get vector of enties in the desired project
 		proj_included<-rep(0, length(data$Project))
 		for(i in 1:length(proj)){
 			proj_in<-data$Project==proj[i]
-			proj_included<-proj_included+proj_in
+			proj_included<-proj_included | proj_in
 		}
+		
+		#get vector of enties with the desired description
+		desc_included<-rep(0, length(data$Description))
+		for(i in 1:length(desc)){
+			desc_in<-data$Description==desc[i]
+			desc_included<-desc_included | desc_in
+		}
+		#print(proj_included)
+		#print(desc_included)
+		include<-(proj_included&desc_included)
+		#print(include)
 		
 		start_date<-as.Date(start_date)
 		end_date<-as.Date(end_date)
@@ -72,6 +81,7 @@ totals_worked<-function(data,
 			date_range_par<-seq(dates[(2*i)-1], dates[2*i], length.out = dates[2*i]-dates[(2*i)-1]+1)
 			date_range<-c(date_range, date_range_par)
 		}
+		
 		#view in terms of weeks
 		if (view_by=="week"){
 			#convert to weeks
@@ -89,8 +99,7 @@ totals_worked<-function(data,
 		#for the project and description combo used
 		duration<-rep(0, length(range)) #pre allocate memory
 		for(i in 1:length(range)){
-			duration[i]<-sum(data$Duration[start_date==range[i]
-				& proj_included & data$Description==desc])
+			duration[i]<-sum(data$Duration[start_date==range[i] & include])
 		}
 		print(summary(duration))
 		print(sd(duration))
@@ -114,5 +123,6 @@ data<-clean_toggl_data("Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
 totals_worked(data, proj=c("animal tag","school"), skip=c("2017-03-05","2017-03-13"))
 totals_worked(data, proj=c("animal tag"), skip=c("2017-03-05","2017-03-13"))
 totals_worked(data, proj=c("school"), skip=c("2017-03-05","2017-03-13"))
+totals_worked(data)
 
 c("2017-03-05","2017-03-13")
