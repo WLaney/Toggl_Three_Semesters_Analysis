@@ -89,6 +89,15 @@ totals_worked<-function(data,
 			range<-unique(weeks) #find the diffrent weeks we want data for
 			start_date<-format(data$Start.date, format = "%W")
 		}
+		
+		#view in terms of months
+		else if (view_by=="month"){
+			#conver to month
+			months<-format(date_range, format = "%m")
+			range<-unique(months)
+			start_date<-format(data$Start.date, format = "%m")
+		}
+		
 		#view in terms of day
 		else {
 			start_date<-data$Start.date
@@ -112,6 +121,11 @@ totals_worked<-function(data,
 			plot(week_dates, duration, type='b', main="total time worked vs week",
 			xlab="date", ylab="duration (Hr)")
 		}
+		else if (view_by=="month"){
+			month_dates<-date_range[match(range, months)]
+			plot(month_dates, duration, type='b', main="total time worked vs month",
+			xlab="date", ylab="duration (Hr)")
+		}
 		else{
 			plot(date_range, duration, type='h', main="total time worked vs day",
 			xlab="date", ylab="duration (Hr)")
@@ -119,10 +133,8 @@ totals_worked<-function(data,
 }
 
 data<-clean_toggl_data("Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
-
-totals_worked(data, proj=c("animal tag","school"), skip=c("2017-03-05","2017-03-13"))
-totals_worked(data, proj=c("animal tag"), skip=c("2017-03-05","2017-03-13"))
-totals_worked(data, proj=c("school"), skip=c("2017-03-05","2017-03-13"))
-totals_worked(data)
-
-c("2017-03-05","2017-03-13")
+spring_break<-c("2017-03-05","2017-03-13")
+#totals_worked(data, proj=c("animal tag","school"), skip=spring_break)
+#totals_worked(data, proj=c("animal tag"), skip=spring_break)
+#totals_worked(data, proj=c("school"), skip=spring_break)
+totals_worked(data, view_by="month")
