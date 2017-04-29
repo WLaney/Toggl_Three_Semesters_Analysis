@@ -131,10 +131,3 @@ totals_worked<-function(data,
 			xlab="date", ylab="duration (Hr)")
 		}
 }
-
-data<-clean_toggl_data("Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
-spring_break<-c("2017-03-05","2017-03-13")
-#totals_worked(data, proj=c("animal tag","school"), skip=spring_break)
-#totals_worked(data, proj=c("animal tag"), skip=spring_break)
-#totals_worked(data, proj=c("school"), skip=spring_break)
-totals_worked(data, view_by="month")
