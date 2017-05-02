@@ -31,6 +31,9 @@ totals_worked<-function(data,
 	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
 	skips=as.Date(x = integer(0), origin = "1970-01-01"), 
 	proj=data$Project, desc=data$Description){
+		#This is a function that gives stats and graphs about the amount of time worked
+		#in a given time span
+		#
 		#this function takes a data set with the optional arguments of:
 		#view by: defalut week, other option day
 		#start date, default first date in data set
@@ -70,6 +73,7 @@ totals_worked<-function(data,
 		#combine included projects and descriptions
 		include<-(proj_included&desc_included)
 		
+		#get start, end, and skiped dates
 		start_date<-as.Date(start_date)
 		end_date<-as.Date(end_date)
 		skips<-as.Date(skips)
@@ -129,16 +133,50 @@ totals_worked<-function(data,
 			xlab="date", ylab="duration (Hr)")
 		}
 		
-		#creat data output tabel
+		#creat data output tabel with desired stats
 		stats_matrix<-matrix(c(mean(duration), median(duration), sd(duration), 
 			max(duration), min(duration)), ncol=5, byrow=T)
 		colnames(stats_matrix)<-c("Mean", "Median", "Sd", "Max", "Min")
 		rownames(stats_matrix)<-c("Totals:")
 		stats<-as.table(stats_matrix)
 		stats
-}
+	}
+
+event_statstics<-function(data, 
+	proj=data$Project, desc=data$Description){
+		#This is a function that gives stats about the duration of indvidual events
+		
+		#get vector of enties in the desired project
+		proj_included<-rep(0, length(data$Project))
+		for(i in 1:length(proj)){
+			proj_in<-data$Project==proj[i]
+			proj_included<-proj_included | proj_in
+		}
+		
+		#get vector of enties with the desired description
+		desc_included<-rep(0, length(data$Description))
+		for(i in 1:length(desc)){
+			desc_in<-data$Description==desc[i]
+			desc_included<-desc_included | desc_in
+		}
+		
+		#get durations of only desired project and descriptions
+		duration<-data$Duration[proj_included&desc_included]
+		
+		#conver to minutes
+		duration<-duration*60
+		
+		#create data output table with desired stats
+		stats_matrix<-matrix(c(mean(duration), median(duration), sd(duration), 
+			max(duration), min(duration)), ncol=5, byrow=T)
+		colnames(stats_matrix)<-c("Mean", "Median", "Sd", "Max", "Min")
+		rownames(stats_matrix)<-c("Event Durations:")
+		stats<-as.table(stats_matrix)
+		round(stats, digits = 2) #round to 2 decimale places
+	}
+
 
 
 data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
-spring_break<-c("2017-03-05","2017-03-13")
-totals_worked(data)
+#spring_break<-c("2017-03-05","2017-03-13")
+event_statstics(data, proj="school", desc="E&M")
