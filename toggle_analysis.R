@@ -65,10 +65,9 @@ totals_worked<-function(data,
 			desc_in<-data$Description==desc[i]
 			desc_included<-desc_included | desc_in
 		}
-		#print(proj_included)
-		#print(desc_included)
+		
+		#combine included projects and descriptions
 		include<-(proj_included&desc_included)
-		#print(include)
 		
 		start_date<-as.Date(start_date)
 		end_date<-as.Date(end_date)
@@ -110,8 +109,6 @@ totals_worked<-function(data,
 		for(i in 1:length(range)){
 			duration[i]<-sum(data$Duration[start_date==range[i] & include])
 		}
-		print(summary(duration))
-		print(sd(duration))
 		
 		#make diffent plots if week or day data
 		#weeks look better with line w/ dot, day looks better with hist
@@ -130,4 +127,16 @@ totals_worked<-function(data,
 			plot(date_range, duration, type='h', main="total time worked vs day",
 			xlab="date", ylab="duration (Hr)")
 		}
+		
+		#creat data output tabel
+		stats_matrix<-matrix(c(mean(duration), median(duration), sd(duration), 
+			max(duration), min(duration)), ncol=5, byrow=T)
+		colnames(stats_matrix)<-c("Mean", "Median", "Sd", "Max", "Min")
+		rownames(stats_matrix)<-c("Total:")
+		stats<-as.table(stats_matrix)
+		stats
 }
+
+data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
+spring_break<-c("2017-03-05","2017-03-13")
+totals_worked(data, view_by="month")
