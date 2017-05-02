@@ -52,6 +52,7 @@ totals_worked<-function(data,
 		#date to be included. The dates between these will be exluded
 		#ex input: skiped=c(start date, end date, start date, end date ...)
 		
+		##############################################
 		#get vector of enties in the desired project
 		proj_included<-rep(0, length(data$Project))
 		for(i in 1:length(proj)){
@@ -132,11 +133,12 @@ totals_worked<-function(data,
 		stats_matrix<-matrix(c(mean(duration), median(duration), sd(duration), 
 			max(duration), min(duration)), ncol=5, byrow=T)
 		colnames(stats_matrix)<-c("Mean", "Median", "Sd", "Max", "Min")
-		rownames(stats_matrix)<-c("Total:")
+		rownames(stats_matrix)<-c("Totals:")
 		stats<-as.table(stats_matrix)
 		stats
 }
 
+
 data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
 spring_break<-c("2017-03-05","2017-03-13")
-totals_worked(data, view_by="month")
+totals_worked(data)
