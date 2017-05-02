@@ -42,7 +42,7 @@ totals_worked<-function(data,
 		#desrciption, default all
 		#skips, defalut none
 		#
-		#Outputs a plot of the total time spent for the project and 
+		#Outputs a plot and stats of the total time spent for the project and 
 		#description combinations over the time span.
 		#
 		#all dates should be in form "%Y-%m-%d" or "%Y/%m/%d"
@@ -145,7 +145,14 @@ totals_worked<-function(data,
 event_statstics<-function(data, 
 	proj=data$Project, desc=data$Description){
 		#This is a function that gives stats about the duration of indvidual events
+		#
+		#this function takes a data set with the optional arguments of:
+		#project, default all
+		#desrciption, default all
+		#
+		#It outputs statistacts about the duration of indivudal events
 		
+		##############################################
 		#get vector of enties in the desired project
 		proj_included<-rep(0, length(data$Project))
 		for(i in 1:length(proj)){
