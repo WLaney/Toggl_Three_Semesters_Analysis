@@ -182,8 +182,95 @@ event_statstics<-function(data,
 		round(stats, digits = 2) #round to 2 decimale places
 	}
 
-
+time_worked<-function(data,
+	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
+	skips=as.Date(x = integer(0), origin = "1970-01-01"),
+	proj=data$Project, desc=data$Description){
+		
+		#get start, end, and skiped dates
+		start_date<-as.Date(start_date)
+		end_date<-as.Date(end_date)
+		skips<-as.Date(skips)
+		dates<-c(start_date, skips, end_date)
+		#find the dates in ranges that we want
+		date_range<-as.Date(x = integer(0), origin = "1970-01-01") #predefine variable
+		for(i in 1:(length(dates)*.5)){
+			#you need to add 1 for the length bc of how seq works
+			date_range_par<-seq(dates[(2*i)-1], dates[2*i], length.out = dates[2*i]-dates[(2*i)-1]+1)
+			date_range<-c(date_range, date_range_par)
+		}
+		
+		#get vector of enties in the desired project
+		proj_included<-rep(0, length(data$Project))
+		for(i in 1:length(proj)){
+			proj_in<-data$Project==proj[i]
+			proj_included<-proj_included | proj_in
+		}
+		
+		#get vector of enties in the desired description
+		desc_included<-rep(0, length(data$Description))
+		for(i in 1:length(desc)){
+			desc_in<-data$Description==desc[i]
+			desc_included<-desc_included | desc_in
+		}
+		
+		#get vector of entries in the desired dates
+		date_included<-rep(0, length(data$Start.date))
+		for(i in 1:length(date_range)){
+			date_in<-data$Start.date==date_range[i]
+			date_included<-date_included | date_in
+		}
+		
+		#get vector of what to include
+		include<-proj_included&desc_included&date_included
+		
+		#get start and end times that have project, descriptions, and dates we want
+		start_time<-data$Start.time[include]
+		end_time<-data$End.time[include]
+		
+		#since it is possible to cross through multiple hours we need to run the loop
+		#that spilts data into hour blocks until all the durations are less than an hour
+		max_dur<-max(data$Duration)*60
+		while (max_dur>60) {
+			#find entries that cross from one hour to another, and there indecies
+			hour_change<-as.numeric(format(start_time, "%H"))!=
+				as.numeric(format(end_time, "%H"))
+			hour_change_ind<-which(hour_change)
+		
+			for(i in 1:length(hour_change_ind)){
+				#get the hour time we want to insert
+				#please note that we are playing games with indecies in this loop because
+				#our vectors get longer each iteration and we need to adjust for that
+				hour<-format(end_time[hour_change_ind[i]+(i-1)], format = "%H")
+				hour<-strptime(hour, format="%H")
+				#insert the new hour time
+				#note that we want the end time to be 1sec before
+				start_time<-append(start_time, hour, after=hour_change_ind[i]+(i-1))
+				end_time<-append(end_time, hour-1, after=hour_change_ind[i]-1+(i-1))
+			}
+		
+			#get time durations in minutes
+			duration<-(end_time-start_time)/60
+			max_dur<-max(duration)
+		}
+		
+		#sum the durations for each hour
+		hour_dur_ave<-rep(0, 24)
+		hour_dur_sd<-rep(0, 24)
+		for(i in 1:24){
+			hour_dur_ave[i]<-mean(duration[as.numeric(format(start_time, "%H"))==i])
+			hour_dur_sd[i]<-sd(duration[as.numeric(format(start_time, "%H"))==i])
+		}
+		hour_dur_ave[is.nan(hour_dur_ave)]<-0
+		hour_dur_sd[is.na(hour_dur_sd)]<-0
+		print(hour_dur_ave)
+		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(1,24),
+			ylab="Average Number of Minutes Worked", xlab="Time of day",
+			main="Average Time Worked vs Time of day")
+	}
 
 data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
-#spring_break<-c("2017-03-05","2017-03-13")
-event_statstics(data, proj="school", desc="E&M")
+str(data)
+spring_break<-c("2017-03-05","2017-03-13")
+time_worked(data, skips=spring_break)
+time_worked(data)
