@@ -245,6 +245,22 @@ time_worked<-function(data,
 		start_time<-data$Start.time[include]
 		end_time<-data$End.time[include]
 		
+		#we need to add 0s for the all the hours were no work was done each day
+		#this is nessary for the averages to comeout okay
+		dates_examined<-data$Start.date[include]
+		uniuqe_dates<-unique(dates_examined)
+		for(i in 1:length(uniuqe_dates)){
+			day_start_times<-as.numeric(format(start_time[dates_examined==uniuqe_dates[i]], "%H"))
+			day_end_times<-as.numeric(format(end_time[dates_examined==uniuqe_dates[i]], "%H"))
+			for(j in 0:23){
+				if(!any(c(day_start_times,day_end_times) == j)){
+					start_time<-append(start_time, strptime(j, format="%H"))
+					end_time<-append(end_time, strptime(j, format="%H"))
+				}
+			}
+		}
+		
+		
 		#since it is possible to cross through multiple hours we need to run the loop
 		#that spilts data into hour blocks until all the durations are less than an hour
 		max_dur<-max(data$Duration)*60
@@ -253,7 +269,6 @@ time_worked<-function(data,
 			hour_change<-as.numeric(format(start_time, "%H"))!=
 				as.numeric(format(end_time, "%H"))
 			hour_change_ind<-which(hour_change)
-		
 			for(i in 1:length(hour_change_ind)){
 				#get the hour time we want to insert
 				#please note that we are playing games with indecies in this loop because
@@ -274,20 +289,34 @@ time_worked<-function(data,
 		#sum the durations for each hour
 		hour_dur_ave<-rep(0, 24)
 		hour_dur_sd<-rep(0, 24)
-		for(i in 1:24){
+		#print(data.frame(start_time,duration))
+		for(i in 0:23){
 			hour_dur_ave[i]<-mean(duration[as.numeric(format(start_time, "%H"))==i])
 			hour_dur_sd[i]<-sd(duration[as.numeric(format(start_time, "%H"))==i])
 		}
-		hour_dur_ave[is.nan(hour_dur_ave)]<-0
-		hour_dur_sd[is.na(hour_dur_sd)]<-0
-		print(hour_dur_ave)
+		#hour_dur_ave[is.nan(hour_dur_ave)]<-0 #get rid on nan for plotting
+		#hour_dur_sd[is.na(hour_dur_sd)]<-0
+		#print(hour_dur_ave)
 		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(1,24),
 			ylab="Average Number of Minutes Worked", xlab="Time of day",
 			main="Average Time Worked vs Time of day")
+		hour_dur_ave
 	}
+find_frimon_dates<-function(dates){
+	#function return unique weekend dates from a list of dates
+	weekend_dates<-dates[grepl("Fri|Mon", weekdays(dates))]
+	unique(weekend_dates)
+}
 
 data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
 str(data)
-spring_break<-c("2017-03-05","2017-03-13")
-time_worked(data, skips=spring_break)
-time_worked(data)
+spring_break<-as.Date(c("2017-03-05","2017-03-13"))
+#skipdates<-find_weekend_dates(data$Start.date)
+#skipdata<-skipdates-rep(1:0, length(skipdates)/2)+rep(0:1, length(skipdates)/2)
+#totals_worked(data, desc="admin")
+skips<-find_frimon_dates(data$Start.date)
+skips<-skips[2:(length(skips)-1)]
+length(skips)
+no_end<-time_worked(data, skips=sort(c(skips, spring_break)))
+end<-time_worked(data, skips=spring_break)
+data.frame(no_end, end)
