@@ -35,7 +35,7 @@ totals_worked<-function(data,
 		#in a given time span
 		#
 		#this function takes a data set with the optional arguments of:
-		#view by: defalut week, other option day
+		#view by: defalut week, other option day, month
 		#start date, default first date in data set
 		#end date, default last date in data set
 		#project, default all
@@ -186,6 +186,23 @@ time_worked<-function(data,
 	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
 	skips=as.Date(x = integer(0), origin = "1970-01-01"),
 	proj=data$Project, desc=data$Description){
+		#This function gives the average number of minutes worked each hour of the day
+		#
+		#this function takes a data set with the optional arguments of:
+		#start date, default first date in data set
+		#end date, default last date in data set
+		#project, default all
+		#desrciption, default all
+		#skips, defalut none
+		#
+		#all dates should be in form "%Y-%m-%d" or "%Y/%m/%d"
+		#
+		#skip gives the ablity to exclude days from the data.
+		#They will not be counted in statistics or ploted
+		#Skips should be a vector that contain the first and last
+		#date to be included. The dates between these will be exluded
+		#ex input: skiped=c(start date, end date, start date, end date ...)
+		##############################################
 		
 		#get start, end, and skiped dates
 		start_date<-as.Date(start_date)
