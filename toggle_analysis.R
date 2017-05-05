@@ -174,7 +174,7 @@ event_statstics<-function(data,
 		duration<-duration*60
 		
 		#create data output table with desired stats
-		stats_matrix<-matrix(c(mean(duration), median(duration), sd(duration), 
+		stats_matrix<-matrix(c(mean(duration), sd(duration), median(duration), 
 			max(duration), min(duration)), ncol=5, byrow=T)
 		colnames(stats_matrix)<-c("Mean", "Median", "Sd", "Max", "Min")
 		rownames(stats_matrix)<-c("Event Durations:")
@@ -216,7 +216,6 @@ time_worked<-function(data,
 			date_range_par<-seq(dates[(2*i)-1], dates[2*i], length.out = dates[2*i]-dates[(2*i)-1]+1)
 			date_range<-c(date_range, date_range_par)
 		}
-		
 		#get vector of enties in the desired project
 		proj_included<-rep(0, length(data$Project))
 		for(i in 1:length(proj)){
@@ -260,7 +259,6 @@ time_worked<-function(data,
 			}
 		}
 		
-		
 		#since it is possible to cross through multiple hours we need to run the loop
 		#that spilts data into hour blocks until all the durations are less than an hour
 		max_dur<-max(data$Duration)*60
@@ -280,7 +278,6 @@ time_worked<-function(data,
 				start_time<-append(start_time, hour, after=hour_change_ind[i]+(i-1))
 				end_time<-append(end_time, hour-1, after=hour_change_ind[i]-1+(i-1))
 			}
-		
 			#get time durations in minutes
 			duration<-(end_time-start_time)/60
 			max_dur<-max(duration)
@@ -289,10 +286,17 @@ time_worked<-function(data,
 		#sum the durations for each hour
 		hour_dur_ave<-rep(0, 24)
 		hour_dur_sd<-rep(0, 24)
+		hour_dur_med<-rep(0, 24)
+		hour_dur_min<-rep(0, 24)
+		hour_dur_max<-rep(0, 24)
 		#print(data.frame(start_time,duration))
 		for(i in 0:23){
-			hour_dur_ave[i]<-mean(duration[as.numeric(format(start_time, "%H"))==i])
-			hour_dur_sd[i]<-sd(duration[as.numeric(format(start_time, "%H"))==i])
+			step_dur<-duration[as.numeric(format(start_time, "%H"))==i]
+			hour_dur_ave[i]<-mean(step_dur)
+			hour_dur_sd[i]<-sd(step_dur)
+			hour_dur_med[i]<-median(step_dur)
+			hour_dur_min[i]<-min(step_dur)
+			hour_dur_max[i]<-max(step_dur)
 		}
 		#hour_dur_ave[is.nan(hour_dur_ave)]<-0 #get rid on nan for plotting
 		#hour_dur_sd[is.na(hour_dur_sd)]<-0
@@ -300,7 +304,7 @@ time_worked<-function(data,
 		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(1,24),
 			ylab="Average Number of Minutes Worked", xlab="Time of day",
 			main="Average Time Worked vs Time of day")
-		hour_dur_ave
+		data.frame(hour_dur_ave,hour_dur_sd, hour_dur_med, hour_dur_min, hour_dur_max)
 	}
 find_frimon_dates<-function(dates){
 	#function return unique weekend dates from a list of dates
@@ -308,15 +312,23 @@ find_frimon_dates<-function(dates){
 	unique(weekend_dates)
 }
 
+find_weekend_dates<-function(dates){
+	#function return unique weekend dates from a list of dates
+	weekend_dates<-dates[grepl("S(at|un)", weekdays(dates))]
+	unique(weekend_dates)
+}
+
 data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
 str(data)
-spring_break<-as.Date(c("2017-03-05","2017-03-13"))
-#skipdates<-find_weekend_dates(data$Start.date)
-#skipdata<-skipdates-rep(1:0, length(skipdates)/2)+rep(0:1, length(skipdates)/2)
+spring_break<-as.Date(c("2017-03-03","2017-03-13"))
+
 #totals_worked(data, desc="admin")
 skips<-find_frimon_dates(data$Start.date)
 skips<-skips[2:(length(skips)-1)]
-length(skips)
-no_end<-time_worked(data, skips=sort(c(skips, spring_break)))
-end<-time_worked(data, skips=spring_break)
-data.frame(no_end, end)
+skips_weakend<-find_weekend_dates(data$Start.date)
+skips_weakend<-skips_weakend[2:(length(skips_weakend)-1)]
+#weekday<-time_worked(data, skips=sort(c(skips, spring_break)))
+#all<-time_worked(data, skips=spring_break)
+#weekend<-time_worked(data, skips=skips_weakend, start_date="2017-01-22")
+test<-time_worked(data, start_date="2017-02-06", end_date="2017-02-10")
+test
