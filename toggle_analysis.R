@@ -255,6 +255,7 @@ time_worked<-function(data,
 				if(!any(c(day_start_times,day_end_times) == j)){
 					start_time<-append(start_time, strptime(j, format="%H"))
 					end_time<-append(end_time, strptime(j, format="%H"))
+					dates_examined<-append(dates_examined, uniuqe_dates[i])
 				}
 			}
 		}
@@ -277,33 +278,37 @@ time_worked<-function(data,
 				#note that we want the end time to be 1sec before
 				start_time<-append(start_time, hour, after=hour_change_ind[i]+(i-1))
 				end_time<-append(end_time, hour-1, after=hour_change_ind[i]-1+(i-1))
+				dates_examined<-append(dates_examined, dates_examined[hour_change_ind[i]+(i-1)], after=hour_change_ind[i]+(i-1))
 			}
 			#get time durations in minutes
 			duration<-(end_time-start_time)/60
 			max_dur<-max(duration)
 		}
-		
-		#sum the durations for each hour
-		hour_dur_ave<-rep(0, 24)
-		hour_dur_sd<-rep(0, 24)
-		hour_dur_med<-rep(0, 24)
-		hour_dur_min<-rep(0, 24)
-		hour_dur_max<-rep(0, 24)
-		#print(data.frame(start_time,duration))
-		for(i in 0:23){
-			step_dur<-duration[as.numeric(format(start_time, "%H"))==i]
-			hour_dur_ave[i]<-mean(step_dur)
-			hour_dur_sd[i]<-sd(step_dur)
-			hour_dur_med[i]<-median(step_dur)
-			hour_dur_min[i]<-min(step_dur)
-			hour_dur_max[i]<-max(step_dur)
+		print(data.frame(dates_examined,start_time,end_time,duration))
+		#find how much time was worked each hour for each day
+		hour_days<-matrix(0, 24, length(uniuqe_dates))
+		for(i in 1:length(uniuqe_dates)){
+			date_durations<-duration[dates_examined==uniuqe_dates[i]]
+			start_durations<-start_time[dates_examined==uniuqe_dates[i]]
+			#print(date_durations)
+				for(j in 1:24){
+					step_dur<-date_durations[as.numeric(format(start_durations, "%H"))==j-1]
+					#print(step_dur)
+					hour_days[j,i]<-sum(step_dur)
+				}
 		}
-		#hour_dur_ave[is.nan(hour_dur_ave)]<-0 #get rid on nan for plotting
-		#hour_dur_sd[is.na(hour_dur_sd)]<-0
-		#print(hour_dur_ave)
-		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(1,24),
+		
+		#get stats
+		hour_dur_ave<-rowMeans(hour_days)
+		hour_dur_sd<-apply(hour_days, 1 ,sd)
+		hour_dur_med<-apply(hour_days, 1, median)
+		hour_dur_min<-apply(hour_days, 1, min)
+		hour_dur_max<-apply(hour_days, 1, max)
+		
+		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(0,23),
 			ylab="Average Number of Minutes Worked", xlab="Time of day",
 			main="Average Time Worked vs Time of day")
+		#return stats
 		data.frame(hour_dur_ave,hour_dur_sd, hour_dur_med, hour_dur_min, hour_dur_max)
 	}
 find_frimon_dates<-function(dates){
@@ -327,8 +332,9 @@ skips<-find_frimon_dates(data$Start.date)
 skips<-skips[2:(length(skips)-1)]
 skips_weakend<-find_weekend_dates(data$Start.date)
 skips_weakend<-skips_weakend[2:(length(skips_weakend)-1)]
-#weekday<-time_worked(data, skips=sort(c(skips, spring_break)))
+weekday<-time_worked(data, skips=sort(c(skips, spring_break)))
+weekday
 #all<-time_worked(data, skips=spring_break)
 #weekend<-time_worked(data, skips=skips_weakend, start_date="2017-01-22")
-test<-time_worked(data, start_date="2017-02-06", end_date="2017-02-10")
-test
+#test<-time_worked(data, start_date="2017-02-06", end_date="2017-02-10")
+#test
