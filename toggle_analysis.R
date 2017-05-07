@@ -216,6 +216,7 @@ time_worked<-function(data,
 			date_range_par<-seq(dates[(2*i)-1], dates[2*i], length.out = dates[2*i]-dates[(2*i)-1]+1)
 			date_range<-c(date_range, date_range_par)
 		}
+		
 		#get vector of enties in the desired project
 		proj_included<-rep(0, length(data$Project))
 		for(i in 1:length(proj)){
@@ -240,13 +241,14 @@ time_worked<-function(data,
 		#get vector of what to include
 		include<-proj_included&desc_included&date_included
 		
-		#get start and end times that have project, descriptions, and dates we want
+		#get dates, start times, and end times that have the 
+		#project, descriptions, and dates we want
 		start_time<-data$Start.time[include]
 		end_time<-data$End.time[include]
+		dates_examined<-data$Start.date[include]
 		
 		#we need to add 0s for the all the hours were no work was done each day
-		#this is nessary for the averages to comeout okay
-		dates_examined<-data$Start.date[include]
+		#this is nessary for the averages to come out okay
 		uniuqe_dates<-unique(dates_examined)
 		for(i in 1:length(uniuqe_dates)){
 			day_start_times<-as.numeric(format(start_time[dates_examined==uniuqe_dates[i]], "%H"))
@@ -262,6 +264,10 @@ time_worked<-function(data,
 		
 		#since it is possible to cross through multiple hours we need to run the loop
 		#that spilts data into hour blocks until all the durations are less than an hour
+		#we will still end up with hours that have more than 60min worked in them.
+		#This is because toggl will let you enter times that over lap, so in raw toggl
+		#data you can more time worked then minutes in the time span. This loop does not
+		#account for that
 		max_dur<-max(data$Duration)*60
 		while (max_dur>60) {
 			#find entries that cross from one hour to another, and there indecies
@@ -284,30 +290,33 @@ time_worked<-function(data,
 			duration<-(end_time-start_time)/60
 			max_dur<-max(duration)
 		}
-		print(data.frame(dates_examined,start_time,end_time,duration))
+		
 		#find how much time was worked each hour for each day
-		hour_days<-matrix(0, 24, length(uniuqe_dates))
+		hour_days<-matrix(0, 24, length(uniuqe_dates)) #pre allocate memory
 		for(i in 1:length(uniuqe_dates)){
+			#look at each day
 			date_durations<-duration[dates_examined==uniuqe_dates[i]]
 			start_durations<-start_time[dates_examined==uniuqe_dates[i]]
-			#print(date_durations)
 				for(j in 1:24){
+					#look at each hour in that day
 					step_dur<-date_durations[as.numeric(format(start_durations, "%H"))==j-1]
-					#print(step_dur)
 					hour_days[j,i]<-sum(step_dur)
 				}
 		}
 		
-		#get stats
+		#get stats from the time worked each hour each day
 		hour_dur_ave<-rowMeans(hour_days)
 		hour_dur_sd<-apply(hour_days, 1 ,sd)
 		hour_dur_med<-apply(hour_days, 1, median)
 		hour_dur_min<-apply(hour_days, 1, min)
 		hour_dur_max<-apply(hour_days, 1, max)
 		
+		#creat a bar plot showing the avargea amount of time worked for each
+		#hour of the day
 		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(0,23),
 			ylab="Average Number of Minutes Worked", xlab="Time of day",
 			main="Average Time Worked vs Time of day")
+			
 		#return stats
 		data.frame(hour_dur_ave,hour_dur_sd, hour_dur_med, hour_dur_min, hour_dur_max)
 	}
