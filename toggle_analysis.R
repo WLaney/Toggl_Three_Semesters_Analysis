@@ -310,6 +310,7 @@ time_worked<-function(data,
 		hour_dur_med<-apply(hour_days, 1, median)
 		hour_dur_min<-apply(hour_days, 1, min)
 		hour_dur_max<-apply(hour_days, 1, max)
+		time_24hr<-seq(0,23)
 		
 		#creat a bar plot showing the avargea amount of time worked for each
 		#hour of the day
@@ -318,8 +319,10 @@ time_worked<-function(data,
 			main="Average Time Worked vs Time of day")
 			
 		#return stats
-		data.frame(hour_dur_ave,hour_dur_sd, hour_dur_med, hour_dur_min, hour_dur_max)
+		data.frame(time_24hr, hour_dur_ave,hour_dur_sd, 
+			hour_dur_med, hour_dur_min, hour_dur_max)
 	}
+
 find_frimon_dates<-function(dates){
 	#function return unique weekend dates from a list of dates
 	weekend_dates<-dates[grepl("Fri|Mon", weekdays(dates))]
@@ -331,19 +334,3 @@ find_weekend_dates<-function(dates){
 	weekend_dates<-dates[grepl("S(at|un)", weekdays(dates))]
 	unique(weekend_dates)
 }
-
-data<-clean_toggl_data("data/Toggl_time_entries_2017-01-16_to_2017-04-23.csv")
-str(data)
-spring_break<-as.Date(c("2017-03-03","2017-03-13"))
-
-#totals_worked(data, desc="admin")
-skips<-find_frimon_dates(data$Start.date)
-skips<-skips[2:(length(skips)-1)]
-skips_weakend<-find_weekend_dates(data$Start.date)
-skips_weakend<-skips_weakend[2:(length(skips_weakend)-1)]
-weekday<-time_worked(data, skips=sort(c(skips, spring_break)))
-weekday
-#all<-time_worked(data, skips=spring_break)
-#weekend<-time_worked(data, skips=skips_weakend, start_date="2017-01-22")
-#test<-time_worked(data, start_date="2017-02-06", end_date="2017-02-10")
-#test
