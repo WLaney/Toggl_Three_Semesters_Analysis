@@ -148,7 +148,8 @@ totals_worked<-function(data,
 		stats
 	}
 
-event_statstics<-function(data, 
+event_statstics<-function(data,
+	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
 	proj=data$Project, desc=data$Description){
 		#This is a function that gives stats about the duration of indvidual events
 		#
@@ -173,8 +174,20 @@ event_statstics<-function(data,
 			desc_included<-desc_included | desc_in
 		}
 		
+		#get start, end, and skiped dates
+		start_date<-as.Date(start_date)
+		end_date<-as.Date(end_date)
+		dates<-c(start_date, end_date)
+		#find the dates in ranges that we want
+		date_range<-as.Date(x = integer(0), origin = "1970-01-01") #predefine variable
+		for(i in 1:(length(dates)*.5)){
+			#you need to add 1 for the length bc of how seq works
+			date_range_par<-seq(dates[(2*i)-1], dates[2*i], length.out = dates[2*i]-dates[(2*i)-1]+1)
+			date_range<-c(date_range, date_range_par)
+		}
+		
 		#get durations of only desired project and descriptions
-		duration<-data$Duration[proj_included&desc_included]
+		duration<-data$Duration[proj_included&desc_included&is.element(data$Start.date,date_range)]
 		
 		#conver to minutes
 		duration<-duration*60
