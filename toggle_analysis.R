@@ -30,7 +30,7 @@ totals_worked<-function(data,
 	view_by="week", 
 	start_date=data$Start.date[1], end_date=data$Start.date[length(data$Start.date)],
 	skips=as.Date(x = integer(0), origin = "1970-01-01"), 
-	proj=data$Project, desc=data$Description){
+	proj=data$Project, desc=data$Description, plotting=T){
 		#This is a function that gives stats and graphs about the amount of time worked
 		#in a given time span
 		#
@@ -91,7 +91,7 @@ totals_worked<-function(data,
 			#convert to weeks
 			weeks<-format(date_range, format = "%W-%y")
 			range<-unique(weeks) #find the diffrent weeks we want data for
-			start_date<-format(data$Start.date, format = "%W-%y")
+			start_dates<-format(data$Start.date, format = "%W-%y")
 		}
 		
 		#view in terms of months
@@ -99,12 +99,12 @@ totals_worked<-function(data,
 			#conver to month
 			months<-format(date_range, format = "%m-%y")
 			range<-unique(months)
-			start_date<-format(data$Start.date, format = "%m-%y")
+			start_dates<-format(data$Start.date, format = "%m-%y")
 		}
 		
 		#view in terms of day
 		else {
-			start_date<-data$Start.date
+			start_dates<-data$Start.date
 			range<-date_range
 		}
 		
@@ -112,33 +112,33 @@ totals_worked<-function(data,
 		#for the project and description combo used
 		duration<-rep(0, length(range)) #pre allocate memory
 		for(i in 1:length(range)){
-			duration[i]<-sum(data$Duration[start_date==range[i] & include])
+			duration[i]<-sum(data$Duration[start_dates==range[i] & include])
 		}
-		
-		#make diffent plots if week or day data
-		#weeks look better with line w/ dot, day looks better with hist
-		if (view_by=="week"){
-			#we need to get the week numbers to dates so that the data plots in order
-			week_dates<-date_range[match(range, weeks)]
-			plot(week_dates, duration, type='b', main="total time worked vs week",
-			xlab="date", ylab="duration (Hr)", xaxt="n")
-			#label the x axis by months
-			axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
-			by="month"), format="%b") 
+		if (plotting==T){
+			#make diffent plots if week or day data
+			#weeks look better with line w/ dot, day looks better with hist
+			if (view_by=="week"){
+				#we need to get the week numbers to dates so that the data plots in order
+				week_dates<-date_range[match(range, weeks)]
+				plot(week_dates, duration, type='b', main="total time worked vs week",
+				xlab="date", ylab="duration (Hr)", xaxt="n")
+				#label the x axis by months
+				axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
+				by="month"), format="%b") 
+			}
+			else if (view_by=="month"){
+				month_dates<-date_range[match(range, months)]
+				plot(month_dates, duration, type='b', main="total time worked vs month",
+				xlab="date", ylab="duration (Hr)", xaxt="n")
+				#label the x axis by months
+				axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
+				by="month"), format="%b")
+			}
+			else{
+				plot(date_range, duration, type='h', main="total time worked vs day",
+				xlab="date", ylab="duration (Hr)")
+			}
 		}
-		else if (view_by=="month"){
-			month_dates<-date_range[match(range, months)]
-			plot(month_dates, duration, type='b', main="total time worked vs month",
-			xlab="date", ylab="duration (Hr)", xaxt="n")
-			#label the x axis by months
-			axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
-			by="month"), format="%b")
-		}
-		else{
-			plot(date_range, duration, type='h', main="total time worked vs day",
-			xlab="date", ylab="duration (Hr)")
-		}
-		
 		#creat data output tabel with desired stats
 		stats_matrix<-matrix(c(mean(duration), median(duration), sd(duration), 
 			max(duration), min(duration)), ncol=5, byrow=T)
