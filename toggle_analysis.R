@@ -121,7 +121,7 @@ totals_worked<-function(data,
 				#we need to get the week numbers to dates so that the data plots in order
 				week_dates<-date_range[match(range, weeks)]
 				plot(week_dates, duration, type='b', main="total time worked vs week",
-				xlab="date", ylab="duration (Hr)", xaxt="n")
+				xlab="date", ylab="duration (Hr)", xaxt="n", ylim=c(0, max(duration)))
 				#label the x axis by months
 				axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
 				by="month"), format="%b") 
@@ -129,14 +129,14 @@ totals_worked<-function(data,
 			else if (view_by=="month"){
 				month_dates<-date_range[match(range, months)]
 				plot(month_dates, duration, type='b', main="total time worked vs month",
-				xlab="date", ylab="duration (Hr)", xaxt="n")
+				xlab="date", ylab="duration (Hr)", xaxt="n", ylim=c(0, max(duration)))
 				#label the x axis by months
 				axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
 				by="month"), format="%b")
 			}
 			else{
 				plot(date_range, duration, type='h', main="total time worked vs day",
-				xlab="date", ylab="duration (Hr)")
+				xlab="date", ylab="duration (Hr)", ylim=c(0, max(duration)))
 			}
 		}
 		#creat data output tabel with desired stats
