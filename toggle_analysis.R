@@ -299,10 +299,21 @@ time_worked<-function(data,
 				#our vectors get longer each iteration and we need to adjust for that
 				hour<-format(end_time[hour_change_ind[i]+(i-1)], format = "%H")
 				hour<-strptime(hour, format="%H")
+				
 				#insert the new hour time
 				#note that we want the end time to be 1sec before
 				start_time<-append(start_time, hour, after=hour_change_ind[i]+(i-1))
-				end_time<-append(end_time, hour-1, after=hour_change_ind[i]-1+(i-1))
+				#if you need to change the first entry things dont work normaly bc
+				#you can not append to become the first in a list
+				if (hour_change_ind[i]==1){
+					first_time<-end_time[1]
+					end_time[1]<-hour-1
+					end_time<-append(end_time, first_time, after=1)
+				}
+				else {
+					end_time<-append(end_time, hour-1, after=hour_change_ind[i]-1+(i-1))
+				}
+				
 				dates_examined<-append(dates_examined, dates_examined[hour_change_ind[i]+(i-1)], after=hour_change_ind[i]+(i-1))
 			}
 			#get time durations in minutes
