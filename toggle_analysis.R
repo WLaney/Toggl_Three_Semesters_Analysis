@@ -120,23 +120,23 @@ totals_worked<-function(data,
 			if (view_by=="week"){
 				#we need to get the week numbers to dates so that the data plots in order
 				week_dates<-date_range[match(range, weeks)]
-				plot(week_dates, duration, type='b', main="total time worked vs week",
-				xlab="date", ylab="duration (Hr)", xaxt="n", ylim=c(0, max(duration)))
+				plot(week_dates, duration, type='b', main="Total Time Worked vs Week",
+				xlab="Date", ylab="Duration (Hr)", xaxt="n", ylim=c(0, max(duration)))
 				#label the x axis by months
 				axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
 				by="month"), format="%b") 
 			}
 			else if (view_by=="month"){
 				month_dates<-date_range[match(range, months)]
-				plot(month_dates, duration, type='b', main="total time worked vs month",
-				xlab="date", ylab="duration (Hr)", xaxt="n", ylim=c(0, max(duration)))
+				plot(month_dates, duration, type='b', main="Total Time Worked vs Month",
+				xlab="Date", ylab="Duration (Hr)", xaxt="n", ylim=c(0, max(duration)))
 				#label the x axis by months
 				axis.Date(1, at=seq(date_range[1], date_range[length(date_range)], 
 				by="month"), format="%b")
 			}
 			else{
-				plot(date_range, duration, type='h', main="total time worked vs day",
-				xlab="date", ylab="duration (Hr)", ylim=c(0, max(duration)))
+				plot(date_range, duration, type='h', main="Total Time Worked vs Day",
+				xlab="Date", ylab="Duration (Hr)", ylim=c(0, max(duration)))
 			}
 		}
 		#creat data output tabel with desired stats
@@ -345,8 +345,8 @@ time_worked<-function(data,
 		#creat a bar plot showing the avargea amount of time worked for each
 		#hour of the day
 		barplot(hour_dur_ave, ylim=c(0,60), names.arg=seq(0,23),
-			ylab="Average Number of Minutes Worked", xlab="Time of day",
-			main="Average Time Worked vs Time of day")
+			ylab="Average Number of Minutes Worked", xlab="Time of Day",
+			main="Average Time Worked vs Time of Day")
 			
 		#return stats
 		data.frame(time_24hr, hour_dur_ave,hour_dur_sd, 
