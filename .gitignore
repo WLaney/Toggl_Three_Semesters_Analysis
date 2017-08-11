@@ -28,3 +28,9 @@ vignettes/*.pdf
 #data files
 *.csv
 data/
+
+#three semester analysis write up files
+Three_Semsters_by_the_numbers.md
+full_output.txt
+plots/
+three_semesters_outline.md
